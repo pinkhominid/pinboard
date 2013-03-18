@@ -1,23 +1,9 @@
 /*!
  * jQuery Pinboard plugin v1.0.0
- * Copyright (c) 2013 Pink Hominid
- * Dual licensed under MIT and GPL.
- * http://enrichmentkit.googlecode.com/svn/trunk/MIT.txt
- * http://enrichmentkit.googlecode.com/svn/trunk/GPL.txt
+ * https://github.com/pinkhominid/pinboard
  *
- * TODO:
- * special iframe handling to prevent reloading
- * store item state in $.data
- * make sure events are preserved on items
- * make arrange more efficient don't append if already in same spot
- * built-in resize throttle
- * trim last br from newSort
- * turn user-select off when unsortable, set cursor move
- * use jquery.widget as prototype
- * support ems and %s for options
- * review arrange behavior upon break
- * qunit
- * bootstrap example style
+ * Copyright 2013 Pink Hominid
+ * Released under the MIT license
  */
 (function($){
     var defaults = {
