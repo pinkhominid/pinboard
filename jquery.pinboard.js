@@ -82,6 +82,8 @@
                 $el.append('<div class="pinboard-clearfix" style="clear:both"/>');
                 toggleColumns(data);
                 setItems.call(this, items);
+
+                $el.on('click', '.pinboard-item-hide-btn, .pinboard-item-show-btn', itemToggle);
             }
         });
     }
@@ -130,8 +132,13 @@
                         .removeAttr('title')
                         .wrap('<div class="pinboard-item"/>')
                         .before($header);
-                    if ($item.css('display') == 'none') {
-                        $item.prop('hidden', true).parent().hide().addClass('pinboard-item-hidden');
+                    if ($item.css('display') == 'none' || $item.attr('hidden') == 'true') {
+                        $item
+                            .css('display', 'none')
+                            .attr('hidden', 'true')
+                            .parent()
+                                .hide()
+                                .addClass('pinboard-item-hidden');
                         if (data.hiding) $show.show();
                     } else {
                         $item.css('display', 'block');
@@ -141,7 +148,6 @@
             }
             data.items = pinItems;
             arrangeItems(data);
-            $('.pinboard-item-hide-btn, .pinboard-item-show-btn', this).on('click', itemToggle);
         }
     }
     function toggleHidden() {
@@ -193,7 +199,7 @@
             $item = $('> :not(.pinboard-item-header)', $pinItem);
 
         $('.pinboard-item-hide-btn, .pinboard-item-show-btn', $pinItem).toggle();
-        $item.prop('hidden', !$item.prop('hidden'));
+        $item.attr('data-hidden', !!$item.attr('data-hidden'));
         if (!data._showHidden) $item.add($pinItem).toggle();
     }
     function getData(el) {
