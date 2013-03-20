@@ -92,13 +92,14 @@
         if (getData(this)) {
             $(this)
                 .empty()
-                .removeClass('pinboard-container')
-                .removeData('pinboard');
+                .removeClass('pinboard-container pinboard-sortable')
+                .removeData('pinboard')
+                .off('click', '.pinboard-item-hide-btn, .pinboard-item-show-btn', itemToggle);
         }
     }
     function resize() {
         var data = getData(this);
-        if (data && toggleColumns(data)) arrangeItems(data);
+        if (data && data.items && toggleColumns(data)) arrangeItems(data);
     }
     function setItems(rawItems) {
         var data = getData(this);
