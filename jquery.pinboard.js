@@ -6,10 +6,12 @@
  * Released under the MIT license
  */
 (function($){
+    'use strict';
+
     var defaults = {
         breaks: [],
         columnMinHeight: 100,
-        sortable: true,
+        sortable: false,
         hiding: false,
         sortHandle: '.pinboard-item-header',
         sortUpdate: undefined
@@ -17,7 +19,7 @@
 
     $.fn.extend({
         pinboard: function (options, value) {
-            if (typeof options == 'string')
+            if (typeof options === 'string') {
                 switch (options) {
                     case 'destroy':
                         this.each(destroy);
@@ -27,7 +29,7 @@
                         break;
                     case 'setItems':
                         this.each(function () {
-                            setItems.call(this, value)
+                            setItems(this, value);
                         });
                         break;
                     case 'toggleHidden':
@@ -37,14 +39,15 @@
                         this.each(toggleSorting);
                         break;
                 }
-            else
-                init.call(this, options);
+            } else {
+                init(this, options);
+            }
             return this;
         }
     });
 
-    function init(options) {
-        this.each(function () {
+    function init($els, options) {
+        $els.each(function () {
             var data, $el, items, i, $cols, $col;
 
             if (!getData(this)) {
@@ -60,7 +63,7 @@
                         .addClass('pinboard-column pinboard-column-' + (i + 1))
                         .css({
                             minHeight: data.columnMinHeight,
-                            float: 'left'
+                            'float': 'left'
                         })
                         .appendTo($el);
                     $cols = $cols.add($col);
@@ -81,7 +84,7 @@
                 data.$cols = $cols;
                 $el.append('<div class="pinboard-clearfix" style="clear:both"/>');
                 toggleColumns(data);
-                setItems.call(this, items);
+                setItems(this, items);
 
                 $el.on('click', '.pinboard-item-hide-btn, .pinboard-item-show-btn', itemToggle);
             }
@@ -89,6 +92,7 @@
     }
 
     function destroy() {
+        /*jshint validthis: true */
         if (getData(this)) {
             $(this)
                 .empty()
@@ -98,11 +102,12 @@
         }
     }
     function resize() {
+        /*jshint validthis: true */
         var data = getData(this);
-        if (data && data.items && toggleColumns(data)) arrangeItems(data);
+        if (data && data.items && toggleColumns(data)) { arrangeItems(data); }
     }
-    function setItems(rawItems) {
-        var data = getData(this);
+    function setItems(el, rawItems) {
+        var data = getData(el);
         if (data) {
             var i, $item, $header, $hide, $show, pinItems = [];
             rawItems = $(rawItems);
@@ -133,17 +138,17 @@
                         .removeAttr('title')
                         .wrap('<div class="pinboard-item"/>')
                         .before($header);
-                    if ($item.css('display') == 'none' || $item.attr('hidden') == 'true') {
+                    if ($item.css('display') === 'none' || $item.attr('hidden') === 'true') {
                         $item
                             .css('display', 'none')
                             .attr('hidden', 'true')
                             .parent()
                                 .hide()
                                 .addClass('pinboard-item-hidden');
-                        if (data.hiding) $show.show();
+                        if (data.hiding) { $show.show(); }
                     } else {
                         $item.css('display', 'block');
-                        if (data.hiding) $hide.show();
+                        if (data.hiding) { $hide.show(); }
                     }
                 }
             }
@@ -152,6 +157,7 @@
         }
     }
     function toggleHidden() {
+        /*jshint validthis: true */
         var data = getData(this);
         if (data && data.hiding) {
             $('.pinboard-item-hidden', data.$el)
@@ -162,6 +168,7 @@
         }
     }
     function toggleSorting() {
+        /*jshint validthis: true */
         var data = getData(this);
         if (data && $.fn.sortable) {
             data.$el.toggleClass('pinboard-sortable');
@@ -170,11 +177,13 @@
         }
     }
 
-    function sortUpdated(event, ui) {
+    function sortUpdated() {
+        /*jshint validthis: true */
         getData(this)._isDirty = true;
     }
-    function sortStopped(event, ui) {
-        var data = getData(this), origSort, newSort, i, $visibleCols;
+    function sortStopped() {
+        /*jshint validthis: true */
+        var data = getData(this), origSort, newSort, i, j, $visibleCols;
 
         if (data._isDirty) {
             data._isDirty = false;
@@ -182,26 +191,27 @@
             newSort = [];
             $visibleCols = data.$cols.filter(':visible');
 
-            for (i = 1; i <= getLargestChildrenCount($visibleCols); i++) {
-                $visibleCols.each(function () {
-                    newSort.push($('.pinboard-item:nth-child(' + i + ') > :not(.pinboard-item-header)', this)[0] || $('<br/>')[0]);
-                });
+            for (i = 1; i <= getMaxChildCount($visibleCols); i++) {
+                for (j = 0; j < $visibleCols.length; j++) {
+                    newSort.push($('.pinboard-item:nth-child(' + i + ') > :not(.pinboard-item-header)', $visibleCols[j])[0] || $('<br/>')[0]);
+                }
             }
             data.items = newSort;
             normalizeColumnHeights(data);
 
-            if (data.sortUpdate) data.sortUpdate({ origSort: origSort, newSort: newSort });
+            if (data.sortUpdate) { data.sortUpdate({ origSort: origSort, newSort: newSort }); }
         }
     }
 
     function itemToggle() {
+        /*jshint validthis: true */
         var data = getData(this),
             $pinItem = $(this).closest('.pinboard-item').toggleClass('pinboard-item-hidden'),
             $item = $('> :not(.pinboard-item-header)', $pinItem);
 
         $('.pinboard-item-hide-btn, .pinboard-item-show-btn', $pinItem).toggle();
         $item.attr('data-hidden', !!$item.attr('data-hidden'));
-        if (!data._showHidden) $item.add($pinItem).toggle();
+        if (!data._showHidden) { $item.add($pinItem).toggle(); }
     }
     function getData(el) {
         return $(el).closest('.pinboard-container').data('pinboard');
@@ -217,13 +227,13 @@
         $cols.hide().eq(0).show();
         numColsVis++;
 
-        if (isSortable(data)) $cols.sortable('disable').eq(0).sortable('enable');
+        if (isSortable(data)) { $cols.sortable('disable').eq(0).sortable('enable'); }
 
         for (i = 0; i < data.breaks.length; i++) {
             if (data.$el.width() >= data.breaks[i]) {
                 $cols.eq(i+1).show();
                 numColsVis++;
-                if (isSortable(data)) $cols.eq(i+1).sortable('enable');
+                if (isSortable(data)) { $cols.eq(i+1).sortable('enable'); }
             }
         }
 
@@ -234,8 +244,9 @@
         var $visibleCols = data.$cols.empty().filter(':visible'), i;
 
         for (i = 0; i < data.items.length; i++) {
-            if (data.items[i])
+            if (data.items[i]) {
                 $visibleCols.eq(i % $visibleCols.length).append($(data.items[i]).parent());
+            }
         }
 
         normalizeColumnHeights(data);
@@ -243,20 +254,36 @@
     function normalizeColumnHeights(data) {
         data.$cols
             .css('minHeight', 'auto')
-            .css('minHeight', Math.max(data.columnMinHeight, getTallest(data.$cols)));
+            .css('minHeight', Math.max(data.columnMinHeight, getTallestHeight(data.$cols)));
     }
-    function getLargestChildrenCount($els) {
+    function getChildCounts($els) {
         var vals = [];
         $els.each(function () {
             vals.push($(this).children().length);
         });
-        return Math.max.apply(null, vals);
+        return vals;
     }
-    function getTallest($els) {
+    function getHeights($els) {
         var vals = [];
         $els.each(function () {
             vals.push($(this).height());
         });
-        return Math.max.apply(null, vals);
+        return vals;
     }
-})(jQuery);
+    function getMaxChildCount($els) {
+        return Math.max.apply(null, getChildCounts($els));
+    }
+    function getTallestHeight($els) {
+        return Math.max.apply(null, getHeights($els));
+    }
+    function getMinChildCountFirstEl($els) {
+        var counts = getChildCounts($els);
+        var min = Math.min.apply(null, counts);
+        return $els[$.inArray(Math.min.apply(null, counts), counts)];
+    }
+    function getShortest($els) {
+        var heights = getHeights($els);
+        var min = Math.min.apply(null, heights);
+        return $els[$.inArray(Math.min.apply(null, heights), heights)];
+    }
+})(window.jQuery);
